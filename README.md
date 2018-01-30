@@ -118,6 +118,7 @@ url需要指定成跳转的最终页面，不帮助跳转到最终页
 
 ## callChrome(script, ...args)
 
+```text
 目前你在 node 进程下，去 chrome 环境中执行一段 js，就要用的该方法
 参数：
     func, arg1, arg2, arg3, ...
@@ -140,6 +141,7 @@ url需要指定成跳转的最终页面，不帮助跳转到最终页
 假设你在 chrome 下，那么可以用  window.callNode 在 node 进程中执行代码。
 
 参数和返回值的设计和 callChrome 一样。
+```
 
 
 # test
