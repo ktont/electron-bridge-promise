@@ -22,7 +22,7 @@
 
 ```js
 var {ipcMain, app} = require('electron');
-var BrowserWindow = require('electron-bridge');
+var BrowserWindow = require('electron-bridge-promise');
 
 app.on('window-all-closed', function() {
     app.quit();
