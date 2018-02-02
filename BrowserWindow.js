@@ -1,4 +1,5 @@
-var {ipcMain, app, BrowserWindow: BrowserWindowRaw} = require('electron');
+var fs = require('fs');
+var { ipcMain, app, BrowserWindow: BrowserWindowRaw } = require('electron');
 var requireScript = require('./require.js')
 var config = require('./config.js');
 
@@ -27,11 +28,6 @@ class BrowserWindow extends BrowserWindowRaw {
     if(params.dev !== false) {
       this.openDevTools();
     }
-
-    //用户指定的preload脚本。延迟执行
-    //this.execUserPreloadScript(params.userPreloadScript || '');
-
-    //this.moduleAttachToWindow = params.moduleAttachToWindow || [];
   }
 
   // 初始化 node 远程调用通道
@@ -148,26 +144,6 @@ class BrowserWindow extends BrowserWindowRaw {
     });
   }
 
-  execUserPreloadScript() {
-      if(!this.userPreloadScript) return;
-      var inject = requireScript(this.userPreloadScript);
-      this.webContents.executeJavaScript(inject+'()');
-  }
-
-  attachModuleToWindow() {
-    var arr = this.moduleAttachToWindow;
-    if(!arr.length) return;
-    var inject = '(function(){'+
-        arr.map(x => {
-            if(typeof x === 'string') {
-                return `window['${x}'] = require('${x}');`;
-            }
-            return `window['${x.to}'] = require('${x.from}');`;
-        }).join('')
-        +'})()';
-    return this.webContents.executeJavaScript(inject);
-  }
-
   /*
    * url: 打开url
    *   本方法考虑了 302，它会打开最终目标页。当然，不过页面没有 302，那是最好。
@@ -224,10 +200,7 @@ class BrowserWindow extends BrowserWindowRaw {
           cont.once('dom-ready', function() {
               resolve(uri);
           });
-      })
-      .then(() => {
-        return this.attachModuleToWindow();
-      })
+      });
   }
 
   /*
@@ -327,6 +300,7 @@ function _validateParamWebPreferences(params) {
   var preload = [];
 
   preload.push(
+    //fs.readFileSync(__dirname + '/preload.js', 'utf8')
     requireScript(__dirname + '/preload.js')+'();'
   );
 
@@ -340,7 +314,7 @@ function _validateParamWebPreferences(params) {
      params.moduleAttachToWindow.length) {
     preload.push(
         '(function(){'+
-        arr.map(x => {
+        params.moduleAttachToWindow.map(x => {
             if(typeof x === 'string') {
                 return `window['${x}'] = require('${x}');`;
             }
@@ -350,9 +324,9 @@ function _validateParamWebPreferences(params) {
     );
   }
 
-  fs.writeFileSync('/tmp/preload.js', preload.join(''));
+  fs.writeFileSync(__dirname + '/preload_1.js', preload.join(''));
 
-  params.webPreferences.preload =  '/tmp/preload.js';
+  params.webPreferences.preload =  __dirname + '/preload_1.js';
 }
 
 
