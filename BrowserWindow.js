@@ -16,9 +16,6 @@ class BrowserWindow extends BrowserWindowRaw {
     this.rpcCallTimer = null;
     this.rpcCallTimeout = params.bridgeTimeout;
 
-    //用户指定的preload脚本。延迟执行
-    this.userPreloadScript = params.userPreloadScript;
-
     this.installNodeRPC = this.installNodeRPC.bind(this);
     this.installChromeRPC = this.installChromeRPC.bind(this);
 
@@ -31,7 +28,9 @@ class BrowserWindow extends BrowserWindowRaw {
       this.openDevTools();
     }
 
-    this.execUserPreloadScript();
+    //用户指定的preload脚本。延迟执行
+    this.execUserPreloadScript(params.userPreloadScript || '');
+    this.attachToWindow(params.moduleAttachToWindow || []);
   }
 
   // 初始化 node 远程调用通道
@@ -152,6 +151,20 @@ class BrowserWindow extends BrowserWindowRaw {
       if(!this.userPreloadScript) return;
       var inject = requireScript(this.userPreloadScript);
       this.webContents.executeJavaScript(inject+'()');
+  }
+
+  attachToWindow(arr) {
+    if(!arr.length) return;
+    var inject = '(function(){'+
+        arr.map(x => {
+            if(typeof x === 'string') {
+                return `window['${x}'] = require('${x}');`;
+            }
+            return `window['${x.to}'] = require('${x.from}');`;
+        }).join('')
+        +'})()';
+    console.log(inject);
+    this.webContents.executeJavaScript(inject);
   }
 
   /*

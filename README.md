@@ -80,6 +80,16 @@ window.callNode(function(name) {
 
 ![](/_img/2.png)
 
+## moduleAttachToWindow 属性
+
+['fs', 'request', 'md5sum']
+
+指定要挂在 window 上的模块名字
+
+模块的查找规则，同node的模块查找规则
+
+
+
 ## bridgeTimeout 属性 
 
 bridgeTimeout 用来设定桥通信的超时时间，毫秒单位。

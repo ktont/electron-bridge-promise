@@ -11,7 +11,10 @@ app.on('ready', function() {
         height: 768,
         webPreferences: {
             preload:  __dirname + '/user_perload.js'
-        }
+        },
+        moduleAttachToWindow: [
+            {from: 'fs', to: 'FS'}
+        ]
     });
 
     win.openURL('file://' + __dirname + '/app.html')
