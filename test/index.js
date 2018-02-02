@@ -9,6 +9,9 @@ app.on('ready', function() {
     var win = new BrowserWindow({
         width: 1024,
         height: 768,
+        webPreferences: {
+            preload:  __dirname + '/user_perload.js'
+        }
     });
 
     win.openURL('file://' + __dirname + '/app.html')

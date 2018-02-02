@@ -2,8 +2,10 @@ var {ipcMain, app, BrowserWindow: BrowserWindowRaw} = require('electron');
 var requireScript = require('./require.js')
 var config = require('./config.js');
 
+
 class BrowserWindow extends BrowserWindowRaw {
   constructor(params) {
+
     _validateParamBridgeTimeout(params);
     _validateParamWebPreferences(params);
 
@@ -13,6 +15,9 @@ class BrowserWindow extends BrowserWindowRaw {
     this.rpcCallTask = [];
     this.rpcCallTimer = null;
     this.rpcCallTimeout = params.bridgeTimeout;
+
+    //用户指定的preload脚本。延迟执行
+    this.userPreloadScript = params.userPreloadScript;
 
     this.installNodeRPC = this.installNodeRPC.bind(this);
     this.installChromeRPC = this.installChromeRPC.bind(this);
@@ -25,6 +30,8 @@ class BrowserWindow extends BrowserWindowRaw {
     if(params.dev !== false) {
       this.openDevTools();
     }
+
+    this.execUserPreloadScript();
   }
 
   // 初始化 node 远程调用通道
@@ -141,6 +148,12 @@ class BrowserWindow extends BrowserWindowRaw {
     });
   }
 
+  execUserPreloadScript() {
+      if(!this.userPreloadScript) return;
+      var inject = requireScript(this.userPreloadScript);
+      this.webContents.executeJavaScript(inject+'()');
+  }
+
   /*
    * url: 打开url
    *   本方法考虑了 302，它会打开最终目标页。当然，不过页面没有 302，那是最好。
@@ -161,7 +174,7 @@ class BrowserWindow extends BrowserWindowRaw {
         setTimeout(() => {
           var uri = cont.getURL();
           if(finalUri) {
-            console.log('navigate to:', finalUri);
+            //console.log('navigate to:', finalUri);
             if(uri === finalUri) {
               cont.removeListener('dom-ready', listenerD);
               cont.removeListener('will-navigate', listenerN);
@@ -295,7 +308,8 @@ function _validateParamWebPreferences(params) {
   }
 
   if(params.webPreferences.preload) {
-    throw new Error('electron-bridge 接管了 preload 脚本，暂时不支持自己设置它');
+    params.userPreloadScript = params.webPreferences.preload;
+    //throw new Error('electron-bridge 接管了 preload 脚本，暂时不支持自己设置它');
   }
 
   params.webPreferences.preload =  __dirname + '/preload.js';
