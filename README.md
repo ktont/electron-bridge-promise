@@ -82,8 +82,12 @@ window.callNode(function(name) {
 
 ## moduleAttachToWindow 属性
 
-['fs', 'request', 'md5sum']
-
+```
+[
+    {from: 'fs', to: 'FS'},
+    {from: 'http', to: 'Http'},
+]
+```
 指定要挂在 window 上的模块名字
 
 模块的查找规则，同node的模块查找规则
