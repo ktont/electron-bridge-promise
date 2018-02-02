@@ -80,7 +80,9 @@ window.callNode(function(name) {
 
 ![](/_img/2.png)
 
-## moduleAttachToWindow 属性
+## moduleAttachToWindow
+
+属性 
 
 ```
 [
@@ -94,7 +96,9 @@ window.callNode(function(name) {
 
 
 
-## bridgeTimeout 属性 
+## bridgeTimeout 
+
+属性 
 
 bridgeTimeout 用来设定桥通信的超时时间，毫秒单位。
 
@@ -108,7 +112,9 @@ bridgeTimeout 用来设定桥通信的超时时间，毫秒单位。
     });
 ```
 
-## dev 属性 
+## dev
+
+属性 
 
 用来设置打开devTools 默认值 true
 
@@ -117,14 +123,18 @@ bridgeTimeout 用来设定桥通信的超时时间，毫秒单位。
 
 当设置为 false 时，不会打开 openDevTools，并且禁止打开 openDevTools（无论如何都打不开开发工具）
 
-## openURL302(url) 方法
+## openURL302(url)
+
+方法
 
 打开url
 本方法考虑了 302，它会打开最终目标页。当然，如果页面没有 302，那是最好，直接到达目标页。
 返回promise, resolve 最终的 url。
 
 
-## openURL(url) 方法
+## openURL(url)
+
+方法
 
 打开url
 url需要指定成跳转的最终页面，不帮助跳转到最终页
@@ -156,7 +166,6 @@ url需要指定成跳转的最终页面，不帮助跳转到最终页
 
 参数和返回值的设计和 callChrome 一样。
 ```
-
 
 # test
 
