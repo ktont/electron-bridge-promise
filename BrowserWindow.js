@@ -29,8 +29,9 @@ class BrowserWindow extends BrowserWindowRaw {
     }
 
     //用户指定的preload脚本。延迟执行
-    this.execUserPreloadScript(params.userPreloadScript || '');
-    this.attachToWindow(params.moduleAttachToWindow || []);
+    //this.execUserPreloadScript(params.userPreloadScript || '');
+
+    //this.moduleAttachToWindow = params.moduleAttachToWindow || [];
   }
 
   // 初始化 node 远程调用通道
@@ -153,7 +154,8 @@ class BrowserWindow extends BrowserWindowRaw {
       this.webContents.executeJavaScript(inject+'()');
   }
 
-  attachToWindow(arr) {
+  attachModuleToWindow() {
+    var arr = this.moduleAttachToWindow;
     if(!arr.length) return;
     var inject = '(function(){'+
         arr.map(x => {
@@ -163,8 +165,7 @@ class BrowserWindow extends BrowserWindowRaw {
             return `window['${x.to}'] = require('${x.from}');`;
         }).join('')
         +'})()';
-    console.log(inject);
-    this.webContents.executeJavaScript(inject);
+    return this.webContents.executeJavaScript(inject);
   }
 
   /*
@@ -223,7 +224,10 @@ class BrowserWindow extends BrowserWindowRaw {
           cont.once('dom-ready', function() {
               resolve(uri);
           });
-      });
+      })
+      .then(() => {
+        return this.attachModuleToWindow();
+      })
   }
 
   /*
@@ -320,12 +324,35 @@ function _validateParamWebPreferences(params) {
     params.webPreferences.nodeIntegration = true;
   }
 
+  var preload = [];
+
+  preload.push(
+    requireScript(__dirname + '/preload.js')+'();'
+  );
+
   if(params.webPreferences.preload) {
-    params.userPreloadScript = params.webPreferences.preload;
-    //throw new Error('electron-bridge 接管了 preload 脚本，暂时不支持自己设置它');
+    preload.push(
+        requireScript(this.params.webPreferences.preload)+'();'
+    );
   }
 
-  params.webPreferences.preload =  __dirname + '/preload.js';
+  if(params.moduleAttachToWindow && 
+     params.moduleAttachToWindow.length) {
+    preload.push(
+        '(function(){'+
+        arr.map(x => {
+            if(typeof x === 'string') {
+                return `window['${x}'] = require('${x}');`;
+            }
+            return `window['${x.to}'] = require('${x.from}');`;
+        }).join('')
+        +'})();'
+    );
+  }
+
+  fs.writeFileSync('/tmp/preload.js', preload.join(''));
+
+  params.webPreferences.preload =  '/tmp/preload.js';
 }
 
 
